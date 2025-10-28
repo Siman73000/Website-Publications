@@ -32,21 +32,21 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  async function renderPDF(url, num) {
-    const loadingTask = pdfjsLib.getDocument(url);
-    pdfDoc = await loadingTask.promise;
+    async function renderPDF(url) {
+        const loadingTask = pdfjsLib.getDocument(url);
+        const pdfDoc = await loadingTask.promise;
+        const container = document.getElementById('pdfContainer');
+        container.innerHTML = ''; // clear previous
 
-    const page = await pdfDoc.getPage(num);
-    const viewport = page.getViewport({ scale: 1.5 });
-
-    canvas.width = viewport.width;
-    canvas.height = viewport.height;
-
-    const renderContext = {
-      canvasContext: ctx,
-      viewport: viewport
-    };
-
-    await page.render(renderContext).promise;
-  }
+        for (let pageNum = 1; pageNum <= pdfDoc.numPages; pageNum++) {
+            const page = await pdfDoc.getPage(pageNum);
+            const viewport = page.getViewport({ scale: 1.5 });
+            const canvas = document.createElement('canvas');
+            canvas.width = viewport.width;
+            canvas.height = viewport.height;
+            const ctx = canvas.getContext('2d');
+            await page.render({ canvasContext: ctx, viewport: viewport }).promise;
+            container.appendChild(canvas);
+        }
+    }
 });
